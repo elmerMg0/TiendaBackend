@@ -2,6 +2,10 @@
 
 namespace app\controllers;
 use Yii;
+use app\models\Seccion;
+use app\models\Producto;
+use yii\web\NotFoundHttpException;
+
 class SeccionController extends \yii\web\Controller
 {
     public function behaviors(){
@@ -24,9 +28,22 @@ class SeccionController extends \yii\web\Controller
         return parent::beforeAction($action);
     }
 
-    public function actionIndex()
+    public function actionIndex( $id )
     {
-        return $this->render('index');  
+        $seccion = Seccion::findOne( $id );
+
+        if($seccion){
+            $products = $seccion->getProductos()->all();
+            return [
+                "sucess" => true,
+                "message" => "La acción se realizo correctamente",
+                "seccion" => $seccion,
+                "products" => $products
+            ];
+
+        }else{
+            throw new NotFoundHttpException("No se encontro ninguna seccion");
+        }
     }
 
 }
