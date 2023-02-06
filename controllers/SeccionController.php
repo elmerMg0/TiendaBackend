@@ -46,4 +46,28 @@ class SeccionController extends \yii\web\Controller
         }
     }
 
+    public function actionView( $id )
+    {
+        $model = Seccion::findOne( $id );
+
+        if($model){
+            $seccion = Producto::find()
+                        ->select(['producto.*','seccion.codigo AS seccion', "marca.nombre as marca"])
+                        ->join("left join", "seccion","seccion.id = producto.seccion_id")
+                        ->innerJoin("marca", "marca.id = producto.marca_id")
+                        ->asArray()
+                        ->all();
+            
+            return [
+                "sucess" => true,
+                "message" => "La acción se realizo correctamente",
+                "seccion" => $model,
+                "products" => $seccion
+            ];
+
+        }else{
+            throw new NotFoundHttpException("No se encontro ninguna seccion");
+        }
+    }
+
 }

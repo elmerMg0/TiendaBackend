@@ -222,4 +222,65 @@ class ProductoController extends \yii\web\Controller
             throw new NotFoundHttpException("Producto no es encontrado.");
         }
     }
+    public function actionAssigncategoria($producto_id,$categoria_id){
+        $producto = Producto::findOne($producto_id);
+        if($producto){
+            $categoria = Categoria::findOne($categoria_id);
+            if($categoria){
+                if( !$producto->getCategorias()->where(["id" => $categoria_id])->all() ){
+
+                    $producto->link("categorias",$categoria);
+                    $response = [
+                        "suceess" => true,
+                        "message" => "Producto asignado correctamente a la categoria ".$categoria->nombre
+                    ];
+                }else{
+                    $response = [
+                        "success" => false,
+                        "message" => "El producto pertenece a la categoria ".$categoria->nombre,
+                    ];
+                }
+            }else{
+                throw new NotFoundHttpException("Categoria no encontrado");
+            }
+        }else{
+            throw new NotFoundHttpException("Producto no encontrado");
+        }
+        return $response;
+    }
+
+    public function actionUnssigncategoria($producto_id, $categoria_id){
+        $producto = Producto::findOne($producto_id);
+        if($producto){
+            $categoria = Categoria::findOne($categoria_id);
+            if($categoria){
+                if( $producto->getCategorias()->where(["id" => $categoria_id])->all() ){
+
+                    try{
+                        $producto->unlink("categorias",$categoria, $delete = true);
+                        $response = [
+                            "suceess" => true,
+                            "message" => "Producto desasignado correctamente de la categoria ".$categoria->nombre
+                        ];
+                    }catch(yii\base\InvalidCallException $ice){
+                        $response = [
+                            "success" => false,
+                            "message" => $ice->getMessage(),
+                            "code" => $ice->getCode(),
+                        ];
+                    }
+                }else{
+                    $response = [
+                        "success" => false,
+                        "message" => "El producto no pertenece a la categoria ".$categoria->nombre,
+                    ];
+                }
+            }else{
+                throw new NotFoundHttpException("Categoria no encontrado");
+            }
+        }else{
+            throw new NotFoundHttpException("Producto no encontrado");
+        }
+        return $response;
+    }
 }
