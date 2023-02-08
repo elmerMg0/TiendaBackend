@@ -19,7 +19,7 @@ class ProductoController extends \yii\web\Controller
             'actions' => [
                 'index' => [ 'get' ],
                 'create' => [ 'post' ],
-                'update' => [ 'put' ],
+                'update' => [ 'put'],
                 'delete' => [ 'delete' ],
                 'Sumproducts' => [ "get" ],
                 'Productmaxstock' => [ "get" ],
@@ -33,6 +33,12 @@ class ProductoController extends \yii\web\Controller
     }
 
     public function beforeAction( $action ) {
+        if (Yii::$app->getRequest()->getMethod() === 'OPTIONS') {         	
+            Yii::$app->getResponse()->getHeaders()->set('Allow', 'POST GET PUT');         	
+            Yii::$app->end();     	
+        }     
+            
+
         $this->enableCsrfValidation = false;
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         return parent::beforeAction($action);
@@ -83,6 +89,7 @@ class ProductoController extends \yii\web\Controller
                     "product" => $product,
                 ];
             }else{
+                Yii::$app->getResponse()->setStatusCode(422,"Data Validation Failed.");
                 $response = [
                     "success" => false,
                     "message" => "Algunos campos tienen errores",
@@ -91,7 +98,12 @@ class ProductoController extends \yii\web\Controller
             }
 
         }else{
-            throw new NotFoundHttpException("Producto no encontrado");
+            Yii::$app->getResponse()->setStatusCode(404);
+            $response = [
+                "success" => false,
+                "message" => "Producto no encontrado"
+            ];
+            //hrow new NotFoundHttpException("Producto no encontrado");
         }
         return $response;
 
@@ -116,12 +128,18 @@ class ProductoController extends \yii\web\Controller
                 ];
             }catch(\Exception $e){
                 $response = [
+                    "success" => false,
                     "message" => $e->getMessage(),
                     "code" => $e->getCode()
                 ];
             }
         }else{
-            throw new NotFoundHttpException("Produto no encontrado");
+            Yii::$app->getResponse()->setStatusCode(404);
+            $response = [
+                "success" => false,
+                "message" => "Producto no encontrado"
+            ];
+            //throw new NotFoundHttpException("Produto no encontrado");
         }
         return $response;
     }
