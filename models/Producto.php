@@ -42,7 +42,7 @@ class Producto extends \yii\db\ActiveRecord
             [['precio'], 'number'],
             [['stock', 'marca_id', 'seccion_id'], 'default', 'value' => null],
             [['stock', 'marca_id', 'seccion_id'], 'integer'],
-            [['fecha_creacion', 'fecha_actualizacion'], 'safe'],
+            //[['fecha_creacion', 'fecha_actualizacion'], 'safe'],
             [['marca_id'], 'exist', 'skipOnError' => true, 'targetClass' => Marca::class, 'targetAttribute' => ['marca_id' => 'id']],
             [['seccion_id'], 'exist', 'skipOnError' => true, 'targetClass' => Seccion::class, 'targetAttribute' => ['seccion_id' => 'id']],
         ];
