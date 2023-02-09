@@ -49,12 +49,13 @@ class ProductoController extends \yii\web\Controller
         $query = Producto::find();
         
         $pagination = new Pagination([
-            'defaultPageSize' => 5,
+            'defaultPageSize' => 10,
 
             'totalCount' => $query->count(),
         ]);
 
         $productos = $query
+                    ->orderBy("id")
                     ->offset($pagination->offset)
                     ->limit($pagination->limit)
                     ->all();
@@ -81,7 +82,7 @@ class ProductoController extends \yii\web\Controller
 
             $params = Yii::$app->getRequest()->getBodyParams();
             $product->load($params,"");
-
+            try{
             if($product->save()){
                 $response = [
                     "success" => true,
@@ -95,6 +96,15 @@ class ProductoController extends \yii\web\Controller
                     "message" => "Algunos campos tienen errores",
                     "errors" => $product->errors,
                 ];
+            }
+
+            }catch( \Exception $e){
+                    Yii::$app->getResponse()->setStatusCode(500);
+                    $response = [
+                        "success" => false,
+                        "message" => "Ocurrio un error al realizar la accion",
+                        "error" => $e->getCode()
+                    ];
             }
 
         }else{
@@ -121,12 +131,14 @@ class ProductoController extends \yii\web\Controller
                     "data" => $producto
                 ];
             }catch(yii\db\IntegrityException $ie){
+                Yii::$app->getResponse()->setStatusCode(409, "");
                 $response = [
                     "success" => false,
                     "message" =>  "El producto esta siendo usado",
                     "code" => $ie->getCode()
                 ];
             }catch(\Exception $e){
+                Yii::$app->getResponse()->setStatusCode(422, "");
                 $response = [
                     "success" => false,
                     "message" => $e->getMessage(),
@@ -152,23 +164,26 @@ class ProductoController extends \yii\web\Controller
         $product -> fecha_creacion = Date("H-m-d H:i:s");
         try{
             if($product -> save()){
+                Yii::$app->getResponse()->setStatusCode(201);
                 $response = [
                     "success" => true,
-                    "message" => "La acción se realizó correctamente",
+                    "message" => "El producto se registro correctamente",
                     "data" => $product,
                 ];
             }else{
+                Yii::$app->getResponse()->setStatusCode(422,"Data Validation Failed.");
                 $response = [
                     "success" => false,
-                    "message" => "ocurrio un error al realizar la acción",
+                    "message" => "Existen parametros incorrectos",
                     "errors" => $product->errors,
                 ];
-            }
+            }               
         }catch(\Exception $e){
+            Yii::$app->getResponse()->setStatusCode(500);
             $response = [
                 "success" => false,
                 "message" => "ocurrio un error al realizar la acción",
-                "error" => $e->getMessage(),
+                "errors" => $e->getMessage(),
             ];
         }
        
