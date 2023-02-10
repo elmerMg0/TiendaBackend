@@ -25,7 +25,7 @@ class ProductoController extends \yii\web\Controller
                 'Productmaxstock' => [ "get" ],
                 'Verifyproductstock' => [ "get" ],
                 'Assigncategoria' => [ "put", "post" ],
-                'Unssigncategoria' => [ "put" ],
+                'Unssigncategoria' => [ "put", "post" ],
 
             ]
          ];
@@ -86,6 +86,7 @@ class ProductoController extends \yii\web\Controller
 
             $params = Yii::$app->getRequest()->getBodyParams();
             $product->load($params,"");
+            $product->fecha_actualizacion = Date("Y-m-d H:i:s");
             try{
             if($product->save()){
                 $response = [
@@ -248,9 +249,10 @@ class ProductoController extends \yii\web\Controller
                         "message" => "Producto asignado correctamente a la categoria ".$categoria->nombre
                     ];
                 }else{
+                    Yii::$app->getResponse()->setStatusCode(422, 'Existing link.');
                     $response = [
                         "success" => false,
-                        "message" => "El producto pertenece a la categoria ".$categoria->nombre,
+                        "message" => "El producto ya pertenece a la categoria ".$categoria->nombre,
                     ];
                 }
             }else{
@@ -283,6 +285,7 @@ class ProductoController extends \yii\web\Controller
                         ];
                     }
                 }else{
+                    Yii::$app->getResponse()->setStatusCode(422, 'No Existing link.');
                     $response = [
                         "success" => false,
                         "message" => "El producto no pertenece a la categoria ".$categoria->nombre,
@@ -293,6 +296,26 @@ class ProductoController extends \yii\web\Controller
             }
         }else{
             throw new NotFoundHttpException("Producto no encontrado");
+        }
+        return $response;
+    }
+
+    public function actionGetCategoriesBelongProduct($producto_id){
+        $product = Producto::findOne($producto_id);
+        if($product){
+            $categories = ProductoCategoria::find()
+                                            ->select([ "producto_id", "categoria.nombre as nombre_categoria", "categoria_id" ])
+                                            ->innerJoin("categoria", "categoria.id = producto_categoria.categoria_id")
+                                            ->asArray()
+                                            ->where(["producto_id" => $producto_id])
+                                            ->all();
+            $response = [
+                "success" => true,
+                "message" => "Las categorias que pertenecen al producto",
+                "categories" => $categories
+            ];
+        }else{
+
         }
         return $response;
     }
