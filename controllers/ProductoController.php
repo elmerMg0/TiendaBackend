@@ -44,12 +44,12 @@ class ProductoController extends \yii\web\Controller
         return parent::beforeAction($action);
     }
 
-    public function actionIndex()
+    public function actionIndex($pageSize = 10)
     {
         $query = Producto::find();
         
         $pagination = new Pagination([
-            'defaultPageSize' => 10,
+            'defaultPageSize' => $pageSize,
 
             'totalCount' => $query->count(),
         ]);
@@ -66,10 +66,14 @@ class ProductoController extends \yii\web\Controller
         $response = [
             "success" => true,
             "message" => "La acción se realizo corretamente",
-            "next" => $currentPage < $totalPages ? $currentPage + 1 : null,
-            "previus" => $currentPage == 1 ? null : $currentPage - 1,
-            "count" => count($productos),
-            "page" => $currentPage,
+            "pageInfo" => [
+                "next" => $currentPage < $totalPages ? $currentPage + 1 : null,
+                "previus" => $currentPage == 1 ? null : $currentPage - 1,
+                "count" => count($productos),
+                "page" => $currentPage,
+                "start" => $pagination->getOffset(),
+                "pageCount" => $pagination->getPageCount(),
+            ],
             "data" => $productos,
         ];
 
