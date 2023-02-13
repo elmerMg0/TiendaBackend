@@ -14,6 +14,10 @@ class ProductoController extends \yii\web\Controller
 {
     public function behaviors(){
         $behaviors = parent::behaviors();
+        $behaviors['authenticator'] = [         	
+            'class' => \yii\filters\auth\HttpBearerAuth::class,         	
+            'except' => ['options']];
+            
         $behaviors['verbs'] = [
             'class' => \yii\filters\VerbFilter::class,
             'actions' => [
