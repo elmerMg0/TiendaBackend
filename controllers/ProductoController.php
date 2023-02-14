@@ -59,7 +59,7 @@ class ProductoController extends \yii\web\Controller
         ]);
 
         $productos = $query
-                    ->orderBy("id")
+                    ->orderBy("id DESC")
                     ->offset($pagination->offset)
                     ->limit($pagination->limit)
                     ->all();

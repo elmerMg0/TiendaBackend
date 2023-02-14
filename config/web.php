@@ -69,9 +69,13 @@ $config = [
             'rules' => [
             ],
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\DbManager',
+        ],
         
     ],
     'params' => $params,
+
 ];
 
 if (YII_ENV_DEV) {
