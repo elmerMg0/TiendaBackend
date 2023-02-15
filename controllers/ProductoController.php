@@ -28,8 +28,8 @@ class ProductoController extends \yii\web\Controller
                 'Sumproducts' => [ "get" ],
                 'Productmaxstock' => [ "get" ],
                 'Verifyproductstock' => [ "get" ],
-                'Assigncategoria' => [ "put", "post" ],
-                'Unssigncategoria' => [ "put", "post" ],
+                'Assigncategoria' => [ "get", "post" ],
+                'Unssigncategoria' => [ "get", "post" ],
 
             ]
          ];
@@ -188,12 +188,12 @@ class ProductoController extends \yii\web\Controller
                 ];
             }               
         }catch(\Exception $e){
-            Yii::$app->getResponse()->setStatusCode(500);
-            $response = [
-                "success" => false,
-                "message" => "ocurrio un error al realizar la acción",
-                "errors" => $e->getMessage(),
-            ];
+                Yii::$app->getResponse()->setStatusCode(500);
+                $response = [
+                    "success" => false,
+                    "message" => "ocurrio un error al realizar la acción",
+                    "errors" => $e->getMessage(),
+                ];
         }
        
         return $response;
@@ -319,8 +319,26 @@ class ProductoController extends \yii\web\Controller
                 "categories" => $categories
             ];
         }else{
-
+            Yii::$app->getResponse()->setStatusCode(404);
+            $response = [
+                "success" => false,
+                "message" => "Producto no encontrado"
+            ];
         }
         return $response;
+    }
+
+    public function actionTestRole(){
+        $auth = Yii::$app->authManager;
+
+        $adminRole = $auth->getRole('Administrador');
+
+        if (Yii::$app->user->identity && in_array($adminRole, Yii::$app->authManager->getRolesByUser(Yii::$app->user->identity->id))) {
+            // El usuario tiene el rol "admin"
+            return 1;
+        } else {
+            return 2;
+            // El usuario no tiene el rol "admin"
+        }
     }
 }

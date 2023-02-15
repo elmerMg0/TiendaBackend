@@ -4,6 +4,8 @@ namespace app\controllers;
 use app\models\User;
 use Exception;
 use Yii;
+use yii\web\NotFoundHttpException;
+
 class UserController extends \yii\web\Controller
 {
 
@@ -29,6 +31,16 @@ class UserController extends \yii\web\Controller
         return parent::beforeAction($action);
     }
 
+    public function actionIndex(){
+        $users = User::find()->all();
+        $response = [
+            "success" => true,
+            "message" => "Acción realizada con éxito",
+            "users" => $users
+        ];
+        return $response;
+    }
+
     public function actionCreate()
     {
         $params = Yii::$app->getRequest()->getBodyParams();
@@ -36,17 +48,38 @@ class UserController extends \yii\web\Controller
 
             $usuario = new User();
             
-            $usuario->nombres = $params["nombre"];
+            $usuario->nombres = $params["nombres"];
             $usuario->username = $params["username"];
             //$usuario->password = Yii::$app->getSecurity()->encryptByPassword("hey","key");
             $usuario->password_hash = Yii::$app->getSecurity()->generatePasswordHash($params["password"]);
             $usuario->access_token = Yii::$app->security->generateRandomString();
             
-            $usuario->save();
+            if($usuario->save()){
+                Yii::$app->getResponse()->setStatusCode(201);
+                $response = [
+                    "success" => true,
+                    "message" => "usuario registrado exitosamente",
+                    "user" => $usuario
+                ];
+            }else{
+                Yii::$app->getResponse()->setStatusCode(422,"Data Validation Failed.");
+                $response = [
+                    "success" => true,
+                    "message" => "Existen parametros incorrectos",
+                    "user" => $usuario->errors
+                ];
+            }
+
+               
         }catch(\Exception $e){
-            $usuario = $e;
+            Yii::$app->getResponse()->setStatusCode(500);
+            $response = [
+                "success" => false,
+                "message" => "ocurrio un error al realizar la acción",
+                "errors" => $e->getMessage(),
+            ];
         }
-        return $usuario;
+        return $response;
     }
 
     public function actionLogin()
