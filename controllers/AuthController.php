@@ -11,21 +11,24 @@ class AuthController extends \yii\web\Controller
     {
         $behaviors = parent::behaviors();
         //…    
-
+        $behaviors['authenticator'] = [         	
+            'class' => \yii\filters\auth\HttpBearerAuth::class,         	
+            'except' => ['options']];
         /// add RBAC authorization     	
         $behaviors['access'] = [
             'class' => \yii\filters\AccessControl::class,
-            'only' => ['actions'], // acciones a las que se aplicará el control
-            'except' => ['actions'],    // acciones a las que no se aplicará el control
+            'only' => ['create-permission'], // acciones a las que se aplicará el control
+            'except' => ['other'],    // acciones a las que no se aplicará el control
             'rules' => [
                 [
                     'allow' => true, // permitido o no permitido
-                    'actions' => ['acciones'], // acciones que siguen esta regla
-                    'roles' => ['roles y/o permisos'] // control por roles  permisos
+                    'actions' => [''], // acciones que siguen esta regla
+                    'controllers' => ['producto'],
+                    'roles' => [''] // control por roles  permisos
                 ],
                 [
                     'allow' => true, // permitido o no permitido
-                    'actions' => ['acciones'], // acciones que siguen esta regla
+                    'actions' => ['accciones'], // acciones que siguen esta regla
                     'matchCallback' => function ($rule, $action) {
                         // control personalizado
                         return true;
@@ -33,7 +36,7 @@ class AuthController extends \yii\web\Controller
                 ],
                 [
                     'allow' => true, // permitido o no permitido
-                    'actions' => ['acciones'], // acciones que siguen esta regla
+                    'actions' => [''], // acciones que siguen esta regla
                     'matchCallback' => function ($rule, $action) {
                         // control personalizado equivalente a '@’ de usuario 
                         // autenticado
@@ -48,6 +51,18 @@ class AuthController extends \yii\web\Controller
         return $behaviors;
     }
 
+
+    public function beforeAction( $action ) {
+        if (Yii::$app->getRequest()->getMethod() === 'OPTIONS') {         	
+            Yii::$app->getResponse()->getHeaders()->set('Allow', 'POST GET PUT');         	
+            Yii::$app->end();     	
+        }     
+            
+
+        $this->enableCsrfValidation = false;
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return parent::beforeAction($action);
+    }
 
     /* Crear roles y permisos */
     public function actionCreatePermission()
@@ -79,7 +94,8 @@ class AuthController extends \yii\web\Controller
         try {
             $params = Yii::$app->getRequest()->getBodyParams();
             $auth = Yii::$app->authManager;
-            $role = $auth->createRole($params["nombre"]);
+            $role = $auth->createRole($params["name"]);
+            $role->description = ($params["description"]);
             $auth->add($role);
             $response = [
                 "success" => true,
@@ -208,4 +224,27 @@ class AuthController extends \yii\web\Controller
         }
         return $response;
     }
+
+    public function actionGetPermissions(){
+        $auth = Yii::$app->authManager;
+        $permissions =  $auth->getPermissions();
+        $response = [
+            "success" => true,
+            "message" => "lista de permisos",
+            "permissions" => $permissions
+        ];
+        return $response;
+    }
+
+    public function actionGetRoles(){
+        $auth = Yii::$app->authManager;
+        $roles =  $auth->getRoles();
+        $response = [
+            "success" => true,
+            "message" => "lista de roles",
+            "roles" => $roles
+        ];
+        return $response;
+    }
 }
+
