@@ -17,13 +17,17 @@ class AuthController extends \yii\web\Controller
         /// add RBAC authorization     	
         $behaviors['access'] = [
             'class' => \yii\filters\AccessControl::class,
-            'only' => [''], // acciones a las que se aplicará el control
+            'only' => ['index',"update","delete","create","assign-category","unssign-category"], // acciones a las que se aplicará el control
             'except' => ['other'],    // acciones a las que no se aplicará el control
             'rules' => [
                 [
                     'allow' => true, // permitido o no permitido
-                    'actions' => [''], // acciones que siguen esta regla
-                    'controllers' => ['producto'],
+                    'actions' => ["index"], // acciones que siguen esta regla
+                    'roles' => ['vendedor'] // control por roles  permisos
+                ],
+                [
+                    'allow' => true, // permitido o no permitido
+                    'actions' => [""], // acciones que siguen esta regla
                     'roles' => [''] // control por roles  permisos
                 ],
                 [
@@ -127,22 +131,22 @@ class AuthController extends \yii\web\Controller
         $auth->remove($role);
     }
 
-    public function actionAssignRole($nombre, $idUser)
+    public function actionAssignRole($name, $idUser)
     {
         $auth = Yii::$app->authManager;
-        $role = $auth->getRole($nombre);
+        $role = $auth->getRole($name);
         if ($role) {
             try {
                 $info = $auth->assign($role, $idUser);
                 $response = [
                     "success" => true,
-                    "message" => "usuario asignado al rol " . $nombre . " exitosamente",
+                    "message" => "usuario asignado al rol " . $name . " exitosamente",
                     "data" => $info
                 ];
             } catch (\Exception $e) {
                 $response = [
                     "success" => false,
-                    "message" => "Usuario ya pertenece al rol " . $nombre,
+                    "message" => "Usuario ya pertenece al rol " . $name,
                     "errors" => $e
                 ];
             }

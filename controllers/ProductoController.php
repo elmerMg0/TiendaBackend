@@ -33,6 +33,41 @@ class ProductoController extends \yii\web\Controller
 
             ]
          ];
+         $behaviors['access'] = [
+            'class' => \yii\filters\AccessControl::class,
+            'only' => ['index',"update","delete","create","assign-category","unssign-category"], // acciones a las que se aplicará el control
+            'except' => ['other'],    // acciones a las que no se aplicará el control
+            'rules' => [
+                [
+                    'allow' => true, // permitido o no permitido
+                    'actions' => ["index"], // acciones que siguen esta regla
+                    'roles' => ['vendedor'] // control por roles  permisos
+                ],
+                [
+                    'allow' => true, // permitido o no permitido
+                    'actions' => ["delete"], // acciones que siguen esta regla
+                    'roles' => ['administrador'] // control por roles  permisos
+                ],
+                [
+                    'allow' => true, // permitido o no permitido
+                    'actions' => ['accciones'], // acciones que siguen esta regla
+                    'matchCallback' => function ($rule, $action) {
+                        // control personalizado
+                        return true;
+                    }
+                ],
+                [
+                    'allow' => true, // permitido o no permitido
+                    'actions' => [''], // acciones que siguen esta regla
+                    'matchCallback' => function ($rule, $action) {
+                        // control personalizado equivalente a '@’ de usuario 
+                        // autenticado
+                        return Yii::$app->user->identity ? true : false;
+                    }
+                ],
+                //…
+            ],
+        ];
         return $behaviors;
     }
 
