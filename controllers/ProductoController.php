@@ -45,7 +45,7 @@ class ProductoController extends \yii\web\Controller
                 ],
                 [
                     'allow' => true, // permitido o no permitido
-                    'actions' => ["delete"], // acciones que siguen esta regla
+                    'actions' => ["update","delete","create","assign-category","unssign-category"], // acciones que siguen esta regla
                     'roles' => ['administrador'] // control por roles  permisos
                 ],
                 [

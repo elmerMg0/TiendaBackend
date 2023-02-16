@@ -92,10 +92,13 @@ class UserController extends \yii\web\Controller
             $user = User::findOne(['username' => $username]);
             if( $user ){
                 if(Yii::$app->security->validatePassword($password, $user->password_hash)){
+                    $auth = Yii::$app->authManager;
+                    $permissions = $auth->getPermissionsByUser($user->id);
                     $response = [
                         "success" => true,
                         "message" => "Inicio de sesión exitoso",
-                        "accessToken" => $user->access_token
+                        "accessToken" => $user->access_token,
+                        "permissions" => $permissions
                     ];
                     return $response;
                 }
