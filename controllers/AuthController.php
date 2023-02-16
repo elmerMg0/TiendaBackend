@@ -17,7 +17,7 @@ class AuthController extends \yii\web\Controller
         /// add RBAC authorization     	
         $behaviors['access'] = [
             'class' => \yii\filters\AccessControl::class,
-            'only' => ['create-permission'], // acciones a las que se aplicará el control
+            'only' => [''], // acciones a las que se aplicará el control
             'except' => ['other'],    // acciones a las que no se aplicará el control
             'rules' => [
                 [
@@ -156,23 +156,23 @@ class AuthController extends \yii\web\Controller
         return $response;
     }
 
-    public function actionAssignPermission($nombre, $idUser)
+    public function actionAssignPermission($name, $idUser)
     {
         $auth = Yii::$app->authManager;
-        $permission = $auth->getPermission($nombre);
+        $permission = $auth->getPermission($name);
         if ($permission) {
             try {
                 $info = $auth->assign($permission, $idUser);
                 $response = [
                     "success" => true,
-                    "message" => "usuario asignado al permiso " . $nombre . " exitosamente",
+                    "message" => "usuario asignado al permiso " . $name . " exitosamente",
                     "data" => $info
                 ];
             } catch (\Exception $e) {
                 Yii::$app->getResponse()->setStatusCode(500);
                 $response = [
                     "success" => false,
-                    "message" => "Usuario ya pertenece al permiso " . $nombre,
+                    "message" => "Usuario ya pertenece al permiso " . $name,
                     "errors" => $e
                 ];
             }
@@ -202,6 +202,7 @@ class AuthController extends \yii\web\Controller
                         "message" => "Permiso asignado a rol exitosamente"
                     ];
                 } catch (\Exception $e) {
+                    Yii::$app->getResponse()->setStatusCode(500);
                     $response = [
                         "success" => false,
                         "message" => "Ocurrio un error",
@@ -246,5 +247,28 @@ class AuthController extends \yii\web\Controller
         ];
         return $response;
     }
+
+    public function actionGetPermissionByRole($name){
+        $auth = Yii::$app->authManager;
+        $permissions =  $auth->getPermissionsByRole($name);
+        $response = [
+            "succes" =>true,
+            "message" => "Permisos by role",
+            "permissions" => $permissions
+        ];
+        return $response;
+    }
+
+    public function actionGetRolesByUser($useId){
+        $auth = Yii::$app->authManager;
+        $roles =  $auth->getRolesByUser($useId);
+        $response = [
+            "succes" =>true,
+            "message" => "Roles by user",
+            "roles" => $roles
+        ];
+        return $response;
+    }
 }
+
 
