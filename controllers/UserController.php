@@ -52,7 +52,8 @@ class UserController extends \yii\web\Controller
             $usuario->username = $params["username"];
             //$usuario->password = Yii::$app->getSecurity()->encryptByPassword("hey","key");
             $usuario->password_hash = Yii::$app->getSecurity()->generatePasswordHash($params["password"]);
-            $usuario->access_token = Yii::$app->security->generateRandomString();
+            //$usuario->access_token = Yii::$app->security->generateRandomString();
+            $usuario->access_token = $this->getTokenJwt();
             
             if($usuario->save()){
                 Yii::$app->getResponse()->setStatusCode(201);
@@ -120,8 +121,18 @@ class UserController extends \yii\web\Controller
         }
         return $response;
     }
-    public function actionLogout()
+    public function getTokenJwt()
     {
+        $token = Yii::$app->jwt->getBuilder()
+        ->setIssuer('http://example.com')
+        ->setAudience('http://example.org')
+        ->setId('4f1g23a12aa', true)
+        ->setIssuedAt(time())
+        ->setExpiration(time() + 3600)
+        ->set('uid', 1)
+        ->sign(Yii::$app->jwt->getSigner("HS256"), Yii::$app->jwt->key)
+        ->getToken();
+        return (string) $token;
     
     }
     

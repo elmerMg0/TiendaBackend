@@ -72,6 +72,11 @@ $config = [
         'authManager' => [
             'class' => 'yii\rbac\DbManager',
         ],
+        'jwt' => [
+            'class' => \sizeg\jwt\Jwt::class,
+            'key'   => 'secret',
+            'jwtValidationData' => \app\components\JwtValidationData::class,
+          ],
         
     ],
     'params' => $params,
